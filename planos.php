@@ -227,7 +227,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isUsuario()) {
         <nav>
             <a href="index.php" class="logo">🐾 PraPet</a>
             <ul>
-                <li><a href="index.php">Início</a></li>
+                <?php if (isLoggedIn()): ?>
+                <?php else: ?>
+                    <li><a href="index.php">Início</a></li>
+                <?php endif; ?>
                 <li><a href="produtos.php">Produtos</a></li>
                 <li><a href="planos.php">Planos</a></li>
                 <?php if (isLoggedIn()): ?>

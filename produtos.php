@@ -28,6 +28,12 @@ $produtos = $stmt->fetchAll();
 // Buscar categorias
 $stmt = $conn->query("SELECT DISTINCT categoria FROM produtos WHERE ativo = 1 AND categoria IS NOT NULL");
 $categorias = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+// Contar itens no carrinho
+$cart_count = 0;
+if (isset($_SESSION['carrinho'])) {
+    $cart_count = array_sum(array_column($_SESSION['carrinho'], 'quantidade'));
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -74,25 +80,38 @@ $categorias = $stmt->fetchAll(PDO::FETCH_COLUMN);
             list-style: none;
             display: flex;
             gap: 2rem;
+            align-items: center;
         }
         
         nav a {
             color: white;
             text-decoration: none;
+            transition: opacity 0.3s;
         }
 
-        .btn {
-            background: white;
-            color: #667eea;
-            padding: 0.6rem 1.5rem;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: transform 0.3s;
+        nav a:hover {
+            opacity: 0.8;
         }
-        
-        .btn:hover {
-            transform: translateY(-2px);
+
+        .cart-link {
+            position: relative;
+            font-size: 1.5rem;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #f44336;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
         }
         
         .container {
@@ -159,6 +178,9 @@ $categorias = $stmt->fetchAll(PDO::FETCH_COLUMN);
             overflow: hidden;
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             transition: transform 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
         }
         
         .product-card:hover {
@@ -219,6 +241,10 @@ $categorias = $stmt->fetchAll(PDO::FETCH_COLUMN);
             color: #4caf50;
             font-size: 0.85rem;
         }
+
+        .product-stock.out {
+            color: #f44336;
+        }
         
         .empty-state {
             text-align: center;
@@ -232,6 +258,20 @@ $categorias = $stmt->fetchAll(PDO::FETCH_COLUMN);
             font-size: 5rem;
             margin-bottom: 1rem;
         }
+
+        .btn {
+            background: white;
+            color: #667eea;
+            padding: 0.6rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -239,11 +279,15 @@ $categorias = $stmt->fetchAll(PDO::FETCH_COLUMN);
         <nav>
             <a href="index.php" class="logo">🐾 PraPet</a>
             <ul>
-                <li><a href="index.php">Início</a></li>
+                <?php if (isLoggedIn()): ?>
+                <?php else: ?>
+                    <li><a href="index.php">Início</a></li>
+                <?php endif; ?>
                 <li><a href="produtos.php">Produtos</a></li>
                 <li><a href="planos.php">Planos</a></li>
                 <?php if (isLoggedIn()): ?>
-                    <li><a href="dashboard.php">Dashboard</a></li>
+                    <li><a href="<?= isUsuario() ? 'dashboard.php' : (isVeterinario() ? 'dashboard_vet.php' : 'dashboard_admin.php') ?>">Dashboard</a></li>
+                    <li><a href="logout.php">Sair</a></li>
                 <?php else: ?>
                     <li><a href="login.php" class="btn">Entrar</a></li>
                 <?php endif; ?>
@@ -286,7 +330,7 @@ $categorias = $stmt->fetchAll(PDO::FETCH_COLUMN);
         <?php else: ?>
             <div class="products-grid">
                 <?php foreach ($produtos as $produto): ?>
-                    <div class="product-card">
+                    <a href="produto_detalhes.php?id=<?= $produto['id_produto'] ?>" class="product-card">
                         <div class="product-image">🛒</div>
                         <div class="product-info">
                             <?php if ($produto['categoria']): ?>
@@ -301,19 +345,23 @@ $categorias = $stmt->fetchAll(PDO::FETCH_COLUMN);
                             
                             <div class="product-footer">
                                 <div class="product-price">R$ <?= number_format($produto['preco'], 2, ',', '.') ?></div>
-                                <div class="product-stock">
+                                <div class="product-stock <?= $produto['estoque'] > 0 ? '' : 'out' ?>">
                                     <?php if ($produto['estoque'] > 0): ?>
-                                        ✓ Em estoque (<?= $produto['estoque'] ?>)
+                                        ✓ Em estoque
                                     <?php else: ?>
-                                        <span style="color: #f44336;">✗ Indisponível</span>
+                                        ✗ Indisponível
                                     <?php endif; ?>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
     </div>
+    <?php if (isLoggedIn()): ?>
+        <?php include 'carrinho_flutuante.php'; ?>
+    <?php else: ?>
+    <?php endif; ?>
 </body>
 </html>

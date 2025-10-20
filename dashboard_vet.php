@@ -79,6 +79,11 @@ $consultas_recentes = $stmt->fetchAll();
         nav a {
             color: white;
             text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
         }
         
         .container {
@@ -256,7 +261,7 @@ $consultas_recentes = $stmt->fetchAll();
 <body>
     <header>
         <nav>
-            <a href="index.php" class="logo">🐾 PraPet</a>
+            <a href="dashboard_vet.php" class="logo">🐾 PraPet</a>
             <ul>
                 <li><a href="dashboard_vet.php">Dashboard</a></li>
                 <li><a href="buscar_pets.php">Buscar Pets</a></li>
@@ -366,9 +371,9 @@ $consultas_recentes = $stmt->fetchAll();
                                         $emoji = match($consulta['especie']) {
                                             'Cachorro' => '🐕',
                                             'Gato' => '🐈',
-                                            'Pássaro' => '🐦',
+                                            'Pássaro' => '🦜',
                                             'Coelho' => '🐰',
-                                            default => '🐾'
+                                            default => '�'
                                         };
                                         echo $emoji . ' ' . htmlspecialchars($consulta['pet_nome']);
                                         ?>

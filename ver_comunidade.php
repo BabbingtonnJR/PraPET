@@ -367,4 +367,4 @@ $posts = $stmt->fetchAll();
         <?php endif; ?>
     </div>
 </body>
-</html>
+</html> 

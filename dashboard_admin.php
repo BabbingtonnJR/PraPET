@@ -1,9 +1,10 @@
+
 <?php
 require_once 'config.php';
 requireLogin();
 
 if (!isAdmin()) {
-    redirect('index.php');
+    redirect('login.php'); // Redireciona para login se não for admin
 }
 
 // Buscar estatísticas gerais
@@ -21,6 +22,12 @@ $posts_pendentes = $stmt->fetch()['total'];
 
 $stmt = $conn->query("SELECT COUNT(*) as total FROM pets WHERE ativo = 1");
 $total_pets = $stmt->fetch()['total'];
+
+$stmt = $conn->query("SELECT COUNT(*) as total FROM comunidades WHERE ativa = 1");
+$total_comunidades = $stmt->fetch()['total'];
+
+$stmt = $conn->query("SELECT COUNT(*) as total FROM pedidos");
+$total_pedidos = $stmt->fetch()['total'];
 
 // Buscar veterinários pendentes
 $stmt = $conn->query("SELECT * FROM veterinarios WHERE status = 'pendente' ORDER BY data_cadastro DESC LIMIT 5");
@@ -41,6 +48,9 @@ $stmt = $conn->query("SELECT p.*,
                       ORDER BY p.data_postagem DESC
                       LIMIT 5");
 $posts_pendentes_lista = $stmt->fetchAll();
+
+$sucesso = $_SESSION['sucesso'] ?? '';
+unset($_SESSION['sucesso']);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -92,6 +102,11 @@ $posts_pendentes_lista = $stmt->fetchAll();
         nav a {
             color: white;
             text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
         }
         
         .container {
@@ -122,6 +137,15 @@ $posts_pendentes_lista = $stmt->fetchAll();
             font-size: 0.9rem;
             margin-top: 0.5rem;
         }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border: 1px solid #c3e6cb;
+        }
         
         .stats-grid {
             display: grid;
@@ -138,6 +162,14 @@ $posts_pendentes_lista = $stmt->fetchAll();
             display: flex;
             align-items: center;
             gap: 1.5rem;
+            transition: transform 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
         
         .stat-card.alert {
@@ -290,7 +322,7 @@ $posts_pendentes_lista = $stmt->fetchAll();
 <body>
     <header>
         <nav>
-            <a href="index.php" class="logo">🐾 PraPet</a>
+            <a href="dashboard_admin.php" class="logo">🐾 PraPet</a>
             <ul>
                 <li><a href="dashboard_admin.php">Dashboard</a></li>
                 <li><a href="gerenciar_veterinarios.php">Veterinários</a></li>
@@ -311,6 +343,10 @@ $posts_pendentes_lista = $stmt->fetchAll();
             <span class="badge-admin">Acesso Master</span>
         </div>
 
+        <?php if ($sucesso): ?>
+            <div class="alert-success">✓ <?= htmlspecialchars($sucesso) ?></div>
+        <?php endif; ?>
+
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">👥</div>
@@ -328,27 +364,43 @@ $posts_pendentes_lista = $stmt->fetchAll();
                 </div>
             </div>
             
-            <div class="stat-card <?= $vet_pendentes > 0 ? 'alert' : '' ?>">
+            <a href="gerenciar_veterinarios.php?filtro=pendente" class="stat-card <?= $vet_pendentes > 0 ? 'alert' : '' ?>" style="text-decoration: none;">
                 <div class="stat-icon">⏳</div>
                 <div class="stat-info">
                     <h3>Veterinários Pendentes</h3>
                     <p><?= $vet_pendentes ?></p>
                 </div>
-            </div>
+            </a>
             
-            <div class="stat-card <?= $posts_pendentes > 0 ? 'alert' : '' ?>">
+            <a href="gerenciar_posts.php?filtro=pendente" class="stat-card <?= $posts_pendentes > 0 ? 'alert' : '' ?>" style="text-decoration: none;">
                 <div class="stat-icon">📝</div>
                 <div class="stat-info">
                     <h3>Posts Pendentes</h3>
                     <p><?= $posts_pendentes ?></p>
                 </div>
-            </div>
+            </a>
             
             <div class="stat-card">
-                <div class="stat-icon">🐾</div>
+                <div class="stat-icon">�</div>
                 <div class="stat-info">
                     <h3>Total de Pets</h3>
                     <p><?= $total_pets ?></p>
+                </div>
+            </div>
+
+            <a href="gerenciar_comunidades.php" class="stat-card" style="text-decoration: none;">
+                <div class="stat-icon">🏘️</div>
+                <div class="stat-info">
+                    <h3>Comunidades Ativas</h3>
+                    <p><?= $total_comunidades ?></p>
+                </div>
+            </a>
+
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-info">
+                    <h3>Total de Pedidos</h3>
+                    <p><?= $total_pedidos ?></p>
                 </div>
             </div>
         </div>

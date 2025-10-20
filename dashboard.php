@@ -47,9 +47,9 @@ $total_vacinas = $stmt->fetch()['total'];
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f5f5;
+            padding-bottom: 100px; /* Espaço para o carrinho flutuante */
         }
         
-        /* Header */
         header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -83,6 +83,11 @@ $total_vacinas = $stmt->fetch()['total'];
         nav a {
             color: white;
             text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
         }
         
         .user-info {
@@ -91,7 +96,6 @@ $total_vacinas = $stmt->fetch()['total'];
             gap: 1rem;
         }
         
-        /* Main Layout */
         .dashboard-container {
             max-width: 1400px;
             margin: 2rem auto;
@@ -121,7 +125,6 @@ $total_vacinas = $stmt->fetch()['total'];
             margin-top: 0.5rem;
         }
         
-        /* Stats Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -155,7 +158,6 @@ $total_vacinas = $stmt->fetch()['total'];
             color: #333;
         }
         
-        /* Pets Section */
         .section-header {
             display: flex;
             justify-content: space-between;
@@ -274,12 +276,13 @@ $total_vacinas = $stmt->fetch()['total'];
 <body>
     <header>
         <nav>
-            <a href="index.php" class="logo">🐾 PraPet</a>
+            <a href="dashboard.php" class="logo">🐾 PraPet</a>
             <ul>
                 <li><a href="dashboard.php">Dashboard</a></li>
                 <li><a href="produtos.php">Produtos</a></li>
                 <li><a href="comunidade.php">Comunidade</a></li>
                 <li><a href="planos.php">Planos</a></li>
+                <li><a href="meus_pedidos.php">Meus Pedidos</a></li>
                 <li class="user-info">
                     <span>👤 <?= htmlspecialchars($user['nome']) ?></span>
                     <a href="logout.php">Sair</a>
@@ -351,7 +354,7 @@ $total_vacinas = $stmt->fetch()['total'];
                             $emoji = match($pet['especie']) {
                                 'Cachorro' => '🐕',
                                 'Gato' => '🐈',
-                                'Pássaro' => '🐦',
+                                'Pássaro' => '🦜',
                                 'Coelho' => '🐰',
                                 default => '🐾'
                             };
@@ -384,5 +387,8 @@ $total_vacinas = $stmt->fetch()['total'];
             </div>
         <?php endif; ?>
     </div>
+
+    <!-- Incluir Carrinho Flutuante -->
+    <?php include 'carrinho_flutuante.php'; ?>
 </body>
 </html>
